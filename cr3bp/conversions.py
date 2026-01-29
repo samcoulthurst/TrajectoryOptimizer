@@ -1,11 +1,3 @@
-"""
-CR3BP Unit and Frame Conversions
-
-This module contains functions for converting between:
-- SI units and normalized (dimensionless) units
-- Rotating (synodic) frame and inertial frame
-"""
-
 import numpy as np
 
 

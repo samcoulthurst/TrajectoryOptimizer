@@ -1,4 +1,3 @@
-# setup.py (in project root, same level as cr3bp/ folder)
 from setuptools import setup, find_packages
 
 setup(

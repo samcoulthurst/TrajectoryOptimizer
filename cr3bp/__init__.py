@@ -1,11 +1,6 @@
 """
 CR3BP - Circular Restricted Three-Body Problem Package
 
-This package provides tools for working with the CR3BP, including:
-- Equations of motion and numerical integration
-- Unit conversions (SI ↔ normalized)
-- Frame conversions (rotating ↔ inertial)
-- System management
 """
 
 from .dynamics import cr3bp_eom, solve_CR3BP
@@ -19,7 +14,9 @@ from .conversions import (
     trajectory_to_normalized,
     trajectory_to_SI
 )
+from .plotting import plot_trajectory
 from .system import CR3BPSystem, create_earth_moon_system, create_sun_earth_system
+
 
 __version__ = '0.1.0'
 
@@ -44,4 +41,7 @@ __all__ = [
     'CR3BPSystem',
     'create_earth_moon_system',
     'create_sun_earth_system',
+
+    # Plotting
+    'plot_trajectory',
 ]
