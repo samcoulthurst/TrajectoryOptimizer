@@ -1,0 +1,11 @@
+README.md
+setup.py
+cr3bp/__init__.py
+cr3bp/conversions.py
+cr3bp/dynamics.py
+cr3bp/system.py
+cr3bp.egg-info/PKG-INFO
+cr3bp.egg-info/SOURCES.txt
+cr3bp.egg-info/dependency_links.txt
+cr3bp.egg-info/requires.txt
+cr3bp.egg-info/top_level.txt
