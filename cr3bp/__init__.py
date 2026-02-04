@@ -17,6 +17,8 @@ from .conversions import (
 from .plotting import plot_trajectory
 from .system import CR3BPSystem, create_earth_moon_system, create_sun_earth_system
 
+# Optimization subpackage (requires cyipopt)
+from . import optimization
 
 __version__ = '0.1.0'
 
@@ -44,4 +46,7 @@ __all__ = [
 
     # Plotting
     'plot_trajectory',
+
+    # Optimization
+    'optimization',
 ]

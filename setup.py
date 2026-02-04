@@ -8,5 +8,6 @@ setup(
         'numpy',
         'scipy',
         'matplotlib',
+        'cyipopt'
     ],
 )
