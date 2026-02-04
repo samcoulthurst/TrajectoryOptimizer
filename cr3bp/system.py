@@ -7,7 +7,7 @@ solving the equations of motion.
 """
 
 import numpy as np
-from .dynamics import cr3bp_eom, cr3bp_jacobian, solve_CR3BP, solve_CR3BP_with_STM
+from .dynamics import cr3bp_eom_with_stm, cr3bp_jacobian, solve_CR3BP_with_STM
 from .conversions import (
     rotating_to_inertial, inertial_to_rotating,
     convert_trajectory_to_inertial, convert_trajectory_to_rotating,
@@ -153,21 +153,10 @@ class CR3BPSystem:
     # ========================================================================
     # DYNAMICS
     # ========================================================================
-    
-    def eom(self, t, state):
-        """See dynamics.py"""
-        return cr3bp_eom(t, state, self.mu)
 
     def jacobian(self, state):
         """Compute Jacobian matrix of CR3BP EoM at given state."""
         return cr3bp_jacobian(state, self.mu)
-
-    def solve(self, state0, t_span, t_eval=None, rtol=1e-12, atol=1e-12,
-              dense_output=False, events=None):
-        """See dynamics.py"""
-        return solve_CR3BP(state0, t_span, self.mu, t_eval=t_eval,
-                          rtol=rtol, atol=atol, dense_output=dense_output,
-                          events=events)
 
     def solve_with_stm(self, state0, t_span, t_eval=None, rtol=1e-12, atol=1e-12,
                        dense_output=False):
