@@ -183,3 +183,59 @@ def solve_CR3BP_with_STM(state0, t_span, mu, t_eval=None, rtol=1e-12, atol=1e-12
     return states, sol.t, stm_final, sol
 
 
+def circular_orbit_state_earth(theta, altitude_m, inclination=0.0, mu=0.01215):
+    """
+    Compute state vector for circular orbit around Earth in Inertial Frame in 
+    Normalized Units
+
+    Parameters
+    ----------
+    theta : float
+        True anomaly / angle on orbit (radians), measured from +x axis
+    altitude_m : float
+        Altitude above Earth surface (m)
+    inclination : float, optional
+        Orbital inclination (radians), default 0 (equatorial)
+    mu : float
+        CR3BP mass parameter 
+
+    Returns
+    -------
+    state : ndarray, shape (6,)
+        State vector [x, y, z, vx, vy, vz] in inertial Frame in normalized units
+    """
+
+    # Normalized radii
+    L_STAR_M = 384400000.0  # Earth-Moon distance in km
+    R_EARTH_M = 6371000.0   # Earth radius in km
+
+    r_earth = R_EARTH_M / L_STAR_M
+    r_orbit = r_earth + altitude_m / L_STAR_M
+
+    # Position in orbital plane (before inclination)
+    x_orb = r_orbit * np.cos(theta)
+    y_orb = r_orbit * np.sin(theta)
+
+    # Apply inclination rotation (about the Earth-Moon x-axis)
+    x_rel = x_orb
+    y_rel = y_orb * np.cos(inclination)
+    z_rel = y_orb * np.sin(inclination)
+
+    # Shift to barycentric frame (Earth at -mu)
+    x = -mu + x_rel
+    y = y_rel
+    z = z_rel
+
+    # Circular velocity magnitude (Earth-centered two-body approximation)
+    v_circ = np.sqrt((1 - mu) / r_orbit)
+
+    # Velocity in orbital plane (perpendicular to position)
+    vx_orb = -v_circ * np.sin(theta)
+    vy_orb = v_circ * np.cos(theta)
+
+    # Apply inclination rotation
+    vx = vx_orb
+    vy = vy_orb * np.cos(inclination)
+    vz = vy_orb * np.sin(inclination)
+
+    return np.array([x, y, z, vx, vy, vz])

@@ -3,7 +3,7 @@ CR3BP - Circular Restricted Three-Body Problem Package
 
 """
 
-from .dynamics import cr3bp_eom_with_stm, solve_CR3BP_with_STM
+from .dynamics import cr3bp_eom_with_stm, solve_CR3BP_with_STM, circular_orbit_state_earth
 from .conversions import (
     rotating_to_inertial,
     inertial_to_rotating,
@@ -24,8 +24,9 @@ __version__ = '0.1.0'
 
 __all__ = [
     # Dynamics
-    'cr3bp_eom',
-    'solve_CR3BP',
+    'cr3bp_eom_with_stm',
+    'solve_CR3BP_with_STM',
+    'circular_orbit_state_earth'
     
     # Frame conversions
     'rotating_to_inertial',
