@@ -79,5 +79,5 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
         print(f"Best constraint point: Theta={min_constraint_x0[0]:.2f} rad, Delta_v={min_constraint_x0[1]:.2f}, Delta_v_angle={min_constraint_x0[2]:.2f} rad, TOF={min_constraint_x0[3]:.2f} s")
         return np.array(min_constraint_x0), min_constraint
     else:
-        return np.array([optimal_theta, optimal_delta_v, optimal_delta_v_angle, optimal_tof]), 
+        return np.array([optimal_theta, optimal_delta_v, optimal_delta_v_angle, optimal_tof]),
 

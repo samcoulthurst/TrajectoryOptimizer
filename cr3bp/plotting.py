@@ -60,8 +60,8 @@ def plot_trajectory(states, mu, times=None, frame="Rotating"):
         # Plot start and end positions
         plt.plot(states_inertial[0, 0], states_inertial[1, 0],
                 'go', markersize=10, label='Start')
-        plt.plot(states_inertial[0, -1], states_inertial[1, -1],
-                'ro', markersize=10, label='End')
+        #plt.plot(states_inertial[0, -1], states_inertial[1, -1],
+        #        'ro', markersize=10, label='End')
 
         # Plot Earth and Moon at multiple time snapshots to show rotation
         n_snapshots = 20
