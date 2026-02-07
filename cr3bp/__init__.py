@@ -16,7 +16,8 @@ from .conversions import (
 )
 from .plotting import plot_trajectory
 from .system import CR3BPSystem, create_earth_moon_system
-from .objective import constraint, objective_func
+from .objective import constraint, objective_func, evaluate
+from .grid_search import grid_search_method
 
 
 __version__ = '0.1.0'
@@ -50,5 +51,9 @@ __all__ = [
 
     # Objective
     'constraint',
-    'objective_func'
+    'objective_func',
+    'evaluate',
+
+    # Grid Search
+    'grid_search_method',
 ]

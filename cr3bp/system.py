@@ -82,6 +82,7 @@ class CR3BPSystem:
         print(f"  Velocity (v*): {self.v_star:.3e} m/s ({self.v_star/1e3:.3f} km/s)")
         print(f"  Acceleration (a*): {self.a_star:.3e} m/s^2")
         print(f"  Period: {2*np.pi*self.t_star/86400:.3f} days")
+        return 
     
     # ========================================================================
     # UNIT CONVERSIONS

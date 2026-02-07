@@ -161,13 +161,19 @@ def decision_to_state0(cr3bp, x0, leo_alt_m):
     # Unpack decision variables
     theta = x0[0] # Angle around LEO
     delta_v = x0[1] # Magnitude of boost
-    delta_v_angle = x0[2] # Angle of boost
+    alpha = x0[2] # Angle of boost
 
     state_leo_rotating = circular_orbit_state_earth(cr3bp, theta, leo_alt_m)
     state_leo_inertial = cr3bp.rotating_to_inertial(state_leo_rotating,0)
+    
+    vx = state_leo_inertial[3]
+    vy = state_leo_inertial[4]
 
-    delta_v_x = delta_v*np.cos(delta_v_angle)
-    delta_v_y = delta_v*np.sin(delta_v_angle)
+    theta = np.arctan2(vy, vx)
+    mag = np.sqrt(vx**2 + vy**2)
+    
+    delta_v_x = delta_v*np.cos(theta + alpha)
+    delta_v_y = delta_v*np.sin(theta + alpha)
 
     state_leo_inertial_boost = state_leo_inertial
     state_leo_inertial_boost[3] += delta_v_x
