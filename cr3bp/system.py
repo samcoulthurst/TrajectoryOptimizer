@@ -30,7 +30,7 @@ class CR3BPSystem:
     convenient wrappers for solving the equations of motion.
     """
     
-    def __init__(self, m1, m2, d):
+    def __init__(self, m1, m2, r1, r2, d):
         """
         Initialize CR3BP system parameters.
         
@@ -43,10 +43,13 @@ class CR3BPSystem:
         d : float
             Distance between primaries in meters
         """
+        # Properties of the system
         self.m1 = m1  # kg
         self.m2 = m2  # kg
         self.m_total = m1 + m2  # kg
         self.d = d  # meters
+        self.r1 = r1
+        self.r2 = r2
         
         # Gravitational constant
         self.G = 6.67430e-11  # m^3 kg^-1 s^-2
@@ -68,6 +71,8 @@ class CR3BPSystem:
         print(f"CR3BP System Information:")
         print(f"  Primary 1 mass: {self.m1:.3e} kg")
         print(f"  Primary 2 mass: {self.m2:.3e} kg")
+        print(f"  Primary 1 radius: {self.r1:.3e} m")
+        print(f"  Primary 2 radius: {self.r2:.3e} m")
         print(f"  Total mass: {self.m_total:.3e} kg")
         print(f"  Distance: {self.d:.3e} m ({self.d/1e3:.1f} km)")
         print(f"  Mass parameter μ: {self.mu:.6f}")
@@ -175,12 +180,6 @@ def create_earth_moon_system():
     m_earth = 5.972e24  # kg
     m_moon = 7.342e22   # kg
     d_em = 384400e3     # m (average distance)
-    return CR3BPSystem(m_earth, m_moon, d_em)
-
-
-def create_sun_earth_system():
-    """Create Sun-Earth CR3BP system."""
-    m_sun = 1.989e30    # kg
-    m_earth = 5.972e24  # kg
-    d_se = 1.496e11     # m (1 AU)
-    return CR3BPSystem(m_sun, m_earth, d_se)
+    r_earth = 6371e3    # m
+    r_moon = 1737e3     # m
+    return CR3BPSystem(m_earth, m_moon, r_earth, r_moon, d_em)

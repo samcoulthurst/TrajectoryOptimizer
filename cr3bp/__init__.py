@@ -3,7 +3,7 @@ CR3BP - Circular Restricted Three-Body Problem Package
 
 """
 
-from .dynamics import cr3bp_eom, solve_CR3BP
+from .dynamics import cr3bp_eom, solve_CR3BP, decision_to_state0, circular_orbit_state_earth
 from .conversions import (
     rotating_to_inertial,
     inertial_to_rotating,
@@ -15,7 +15,7 @@ from .conversions import (
     trajectory_to_SI
 )
 from .plotting import plot_trajectory
-from .system import CR3BPSystem, create_earth_moon_system, create_sun_earth_system
+from .system import CR3BPSystem, create_earth_moon_system
 
 
 __version__ = '0.1.0'
@@ -24,6 +24,8 @@ __all__ = [
     # Dynamics
     'cr3bp_eom',
     'solve_CR3BP',
+    'decision_to_state0',
+    'circular_orbit_state_earth',
     
     # Frame conversions
     'rotating_to_inertial',

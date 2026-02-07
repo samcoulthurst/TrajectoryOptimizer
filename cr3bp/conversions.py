@@ -5,7 +5,7 @@ import numpy as np
 # FRAME CONVERSIONS
 # ============================================================================
 
-def rotating_to_inertial(state_rot, t, mu):
+def rotating_to_inertial(state_rot, t, mu=0.012):
     """
     Convert state from rotating (synodic) frame to inertial frame.
     
@@ -47,7 +47,7 @@ def rotating_to_inertial(state_rot, t, mu):
     return np.array([X, Y, Z, VX, VY, VZ])
 
 
-def inertial_to_rotating(state_iner, t, mu):
+def inertial_to_rotating(state_iner, t, mu=0.012):
     """
     Convert state from inertial frame to rotating (synodic) frame.
     
