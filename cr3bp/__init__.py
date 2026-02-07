@@ -16,7 +16,7 @@ from .conversions import (
 )
 from .plotting import plot_trajectory
 from .system import CR3BPSystem, create_earth_moon_system, create_sun_earth_system
-from .leo_lmo_optimizer import optimize_leo_to_lmo
+from .leo_lmo_optimizer import optimize_leo_to_lmo, LEOtoLMOProblem
 from .grid_search import grid_search_initial_guess, optimize_with_grid_search
 
 __version__ = '0.1.0'
@@ -48,6 +48,7 @@ __all__ = [
     'plot_trajectory',
 
     # Optimization
+    'LEOtoLMOProblem',
     'optimize_leo_to_lmo',
     'grid_search_initial_guess',
     'optimize_with_grid_search',

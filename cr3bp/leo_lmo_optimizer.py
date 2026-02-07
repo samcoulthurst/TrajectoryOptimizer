@@ -143,7 +143,7 @@ def compute_lmo_insertion_dv(state_f, lmo_altitude_m, mu=MU_EM):
     r_LMO = (R_MOON_M + lmo_altitude_m) / L_STAR_M
 
     # Circular velocity at LMO (Moon-centered two-body)
-    v_circ = np.sqrt(mu / r_LMO)
+    v_circ = np.sqrt(mu / r_mag)
 
     # Velocity direction: prograde = perpendicular to position, in orbital plane
     # v_dir = cross(z_hat, r_hat) for prograde
@@ -264,6 +264,35 @@ class LEOtoLMOProblem:
         _, dv2_mag = compute_lmo_insertion_dv(state_f, self.lmo_alt_m, self.mu)
 
         return dv1_mag + dv2_mag
+
+    def evaluate(self, x):
+        """
+        Compute objective and constraint in a single propagation.
+
+        Parameters
+        ----------
+        x : ndarray
+            Decision variables [theta, dv1_x, dv1_y, dv1_z, T]
+
+        Returns
+        -------
+        obj : float
+            Total delta-v = |dv1| + |dv2| (normalized)
+        con : float
+            Constraint value: |r_arrival - r_moon| - r_LMO (should be 0)
+        """
+        state_f = self._propagate(x)
+
+        # Objective: total delta-v
+        dv1_mag = np.linalg.norm(x[1:4])
+        _, dv2_mag = compute_lmo_insertion_dv(state_f, self.lmo_alt_m, self.mu)
+        obj = dv1_mag + dv2_mag
+
+        # Constraint: arrive at LMO altitude
+        r_rel = state_f[:3] - np.array([1 - self.mu, 0, 0])
+        con = np.linalg.norm(r_rel) - self.r_LMO
+
+        return obj, con
 
     def gradient(self, x):
         """Compute objective gradient via central finite differences."""
@@ -446,6 +475,7 @@ def optimize_leo_to_lmo(leo_alt_m=463e3, lmo_alt_m=100e3, x0=None,
     nlp.add_option('print_level', 5)
     nlp.add_option('tol', 1e-6)
     nlp.add_option('max_iter', max_iter)
+    nlp.add_option('jacobian_approximation', 'exact')
     nlp.add_option('hessian_approximation', 'limited-memory')
 
     # Solve

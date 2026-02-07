@@ -3,16 +3,21 @@ Grid Search for LEO to LMO Transfer Initial Guess
 
 Performs a coarse grid search over departure angle, time of flight, and
 delta-v magnitude to find a good initial guess for the optimizer.
+
+Uses LEOtoLMOProblem to evaluate objective (total delta-v) and constraint
+(LMO altitude arrival) at each grid point.
 """
 
 import numpy as np
-from .dynamics import solve_CR3BP_with_STM
 from .leo_lmo_optimizer import (
+    LEOtoLMOProblem,
     leo_state_rotating,
-    L_STAR_M, R_MOON_M, MU_EM
+    L_STAR_M, MU_EM
 )
 
 def grid_search_initial_guess(
+    problem=None,
+    constraint_tol=0.01,
     leo_alt_m=463e3,
     lmo_alt_m=100e3,
     n_theta=32,
@@ -26,18 +31,28 @@ def grid_search_initial_guess(
     """
     Grid search to find a good initial guess for the LEO to LMO transfer.
 
+    Minimizes total delta-v (objective) among points where the constraint
+    violation is within tolerance. Falls back to the least-infeasible point
+    if no feasible points are found.
+
     Parameters
     ----------
+    problem : LEOtoLMOProblem, optional
+        Problem instance. If None, one is created from leo_alt_m/lmo_alt_m.
+    constraint_tol : float
+        Maximum allowable constraint violation in normalized units
+        (default: 0.01, ~3,844 km). Points within this tolerance are
+        considered feasible.
     leo_alt_m : float
         LEO altitude in meters (default: 463 km)
     lmo_alt_m : float
         LMO altitude in meters (default: 100 km)
     n_theta : int
-        Number of departure angles to try (default: 6)
+        Number of departure angles to try
     n_tof : int
-        Number of time-of-flight values to try (default: 8)
+        Number of time-of-flight values to try
     n_dv_mag : int
-        Number of delta-v magnitudes to try (default: 4)
+        Number of delta-v magnitudes to try
     theta_range : tuple
         Range of departure angles (radians)
     tof_range : tuple
@@ -51,11 +66,20 @@ def grid_search_initial_guess(
     -------
     x0 : ndarray, shape (5,)
         Best initial guess [theta, dv1_x, dv1_y, dv1_z, T]
-    miss_distance : float
-        Miss distance from target LMO altitude (normalized)
+    best_obj : float
+        Total delta-v at best point (normalized, |dv1| + |dv2|)
+    best_con : float
+        Constraint violation at best point (normalized, |r_arrival - r_LMO|)
     """
     mu = MU_EM
-    r_LMO = (R_MOON_M + lmo_alt_m) / L_STAR_M
+
+    if problem is None:
+        problem = LEOtoLMOProblem(
+            mu=mu,
+            leo_alt_m=leo_alt_m,
+            lmo_alt_m=lmo_alt_m,
+            print_iter=False
+        )
 
     # Create grid
     thetas = np.linspace(theta_range[0], theta_range[1], n_theta, endpoint=False)
@@ -68,9 +92,12 @@ def grid_search_initial_guess(
         print(f"  Theta range: [{np.rad2deg(theta_range[0]):.0f}, {np.rad2deg(theta_range[1]):.0f}] deg")
         print(f"  TOF range: [{tof_range[0]:.2f}, {tof_range[1]:.2f}] normalized")
         print(f"  DV magnitude range: [{dv_mag_range[0]:.2f}, {dv_mag_range[1]:.2f}] normalized")
+        print(f"  Constraint tolerance: {constraint_tol:.4f} normalized ({constraint_tol * L_STAR_M / 1000:.0f} km)")
 
     best_x0 = None
-    best_miss = np.inf
+    best_obj = np.inf
+    best_con = np.inf
+    found_feasible = False
     eval_count = 0
 
     for theta in thetas:
@@ -84,29 +111,30 @@ def grid_search_initial_guess(
 
             for tof in tofs:
                 eval_count += 1
-
-                # Apply delta-v and propagate
-                state0 = state0_base.copy()
-                state0[3:6] += dv1
+                x = np.array([theta, dv1[0], dv1[1], dv1[2], tof])
 
                 try:
-                    states, times, stm, sol = solve_CR3BP_with_STM(
-                        state0, (0, tof), mu, rtol=1e-10, atol=1e-10
-                    )
-                    state_f = states[:, -1]
+                    obj, con = problem.evaluate(x)
+                    con_viol = abs(con)
 
-                    # Compute miss distance from LMO altitude
-                    r_rel = state_f[:3] - np.array([1 - mu, 0, 0])
-                    r_arrival = np.linalg.norm(r_rel)
-                    miss = abs(r_arrival - r_LMO)
+                    if con_viol < constraint_tol:
+                        # Feasible point: pick lowest objective
+                        if not found_feasible or obj < best_obj:
+                            best_x0 = x
+                            best_obj = obj
+                            best_con = con_viol
+                            found_feasible = True
+                    else:
+                        # Infeasible: track least-infeasible as fallback
+                        if not found_feasible and con_viol < best_con:
+                            best_x0 = x
+                            best_obj = obj
+                            best_con = con_viol
 
-                    if miss < best_miss:
-                        best_miss = miss
-                        best_x0 = np.array([theta, dv1[0], dv1[1], dv1[2], tof])
-
-                        if verbose and eval_count % 50 == 0:
-                            miss_km = miss * L_STAR_M / 1000
-                            print(f"  [{eval_count}/{total_evals}] New best: miss = {miss_km:.1f} km")
+                    if verbose and eval_count % 500 == 0:
+                        status = "FEASIBLE" if found_feasible else "infeasible"
+                        print(f"  [{eval_count}/{total_evals}] Best: obj={best_obj:.4f}, "
+                              f"con={best_con * L_STAR_M / 1000:.1f} km [{status}]")
 
                 except Exception:
                     # Integration failed (trajectory crashed, etc.)
@@ -114,20 +142,24 @@ def grid_search_initial_guess(
 
     if verbose:
         if best_x0 is not None:
-            miss_km = best_miss * L_STAR_M / 1000
-            print(f"\nGrid search complete!")
+            con_km = best_con * L_STAR_M / 1000
+            status = "FEASIBLE" if found_feasible else "INFEASIBLE (fallback)"
+            print(f"\nGrid search complete! [{status}]")
             print(f"  Best theta: {np.rad2deg(best_x0[0]):.2f} deg")
             print(f"  Best dv1 magnitude: {np.linalg.norm(best_x0[1:4]):.4f} normalized")
             print(f"  Best TOF: {best_x0[4]:.4f} normalized")
-            print(f"  Miss distance: {miss_km:.2f} km")
+            print(f"  Objective (total dv): {best_obj:.6f} normalized")
+            print(f"  Constraint violation: {con_km:.2f} km")
         else:
             print("\nGrid search failed to find any valid trajectory!")
 
-    return best_x0, best_miss
+    return best_x0, best_obj, best_con
 
 
 
 def optimize_with_grid_search(
+    problem=None,
+    constraint_tol=0.01,
     leo_alt_m=463e3,
     lmo_alt_m=100e3,
     n_theta=6,
@@ -141,6 +173,10 @@ def optimize_with_grid_search(
 
     Parameters
     ----------
+    problem : LEOtoLMOProblem, optional
+        Problem instance. If None, one is created from leo_alt_m/lmo_alt_m.
+    constraint_tol : float
+        Maximum allowable constraint violation for grid search (normalized)
     leo_alt_m : float
         LEO altitude in meters
     lmo_alt_m : float
@@ -154,17 +190,30 @@ def optimize_with_grid_search(
 
     Returns
     -------
-    result : dict
-        Optimization results (same as optimize_leo_to_lmo)
+    x0 : ndarray, shape (5,)
+        Best initial guess from grid search
+    best_obj : float
+        Total delta-v at best point (normalized)
+    best_con : float
+        Constraint violation at best point (normalized)
     """
-    # Import here to avoid circular import
-    #from .leo_lmo_optimizer import optimize_leo_to_lmo
+    mu = MU_EM
+
+    if problem is None:
+        problem = LEOtoLMOProblem(
+            mu=mu,
+            leo_alt_m=leo_alt_m,
+            lmo_alt_m=lmo_alt_m,
+            print_iter=print_iter
+        )
 
     print("=" * 60)
     print("PHASE 1: Grid Search for Initial Guess")
     print("=" * 60)
 
-    x0, miss = grid_search_initial_guess(
+    x0, best_obj, best_con = grid_search_initial_guess(
+        problem=problem,
+        constraint_tol=constraint_tol,
         leo_alt_m=leo_alt_m,
         lmo_alt_m=lmo_alt_m,
         n_theta=n_theta,
@@ -189,7 +238,7 @@ def optimize_with_grid_search(
     #    max_iter=max_iter
     #)
 
-    return x0, miss
+    return x0, best_obj, best_con
 
 
 if __name__ == "__main__":
