@@ -1,3 +1,16 @@
+"""
+CR3BP Dynamics
+
+This module contains the dynamics functions for CR3BP trajectories.
+
+Functions:
+cr3bp_eom
+solve_CR3BP
+circular_orbit_state_earth
+decision_to_state0
+
+"""
+
 import numpy as np
 from scipy.integrate import solve_ivp
 

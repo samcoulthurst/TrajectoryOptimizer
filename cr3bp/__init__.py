@@ -16,6 +16,7 @@ from .conversions import (
 )
 from .plotting import plot_trajectory
 from .system import CR3BPSystem, create_earth_moon_system
+from .objective import constraint, objective_func
 
 
 __version__ = '0.1.0'
@@ -46,4 +47,8 @@ __all__ = [
 
     # Plotting
     'plot_trajectory',
+
+    # Objective
+    'constraint',
+    'objective_func'
 ]
