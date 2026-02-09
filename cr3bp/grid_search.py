@@ -28,8 +28,8 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
 
     Return
     ------
-    optimal_delta_v : float
-        Optimal delta v found in the grid search
+    results_df : pd.DataFrame
+        Table of all feasible solutions with decision variables and objective values
     """
 
     # Create grid of decision variables
@@ -38,47 +38,54 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
     num_delta_v_angle = 10
     num_tof = 20
     print(f"Performing grid search with {num_theta} x {num_delta_v} x {num_delta_v_angle} x {num_tof} = {num_theta*num_delta_v*num_delta_v_angle*num_tof} grid points...")
-    #print(f"Estimated time is {num_theta*num_delta_v*num_delta_v_angle*num_tof / 2 / 60:.2f} minutes (assuming 1s per evaluation)")
     theta_range = np.linspace(dec_var_ranges[0][0], dec_var_ranges[0][1], num_theta)
     delta_v_range = np.linspace(dec_var_ranges[1][0], dec_var_ranges[1][1], num_delta_v)
     delta_v_angle_range = np.linspace(dec_var_ranges[2][0], dec_var_ranges[2][1], num_delta_v_angle)
     tof_range = np.linspace(dec_var_ranges[3][0], dec_var_ranges[3][1], num_tof)
 
-    optimal_delta_v = None
+    feasible_solutions = []
     min_delta_v = np.inf
     min_constraint = np.inf
     min_constraint_x0 = None
     iteration = 0
     total_iterations = num_theta * num_delta_v * num_delta_v_angle * num_tof
-    # Iterate over the grid
+
     for theta in theta_range:
         for delta_v in delta_v_range:
             for delta_v_angle in delta_v_angle_range:
                 for tof in tof_range:
-                    print(f"Iteration: {iteration+1}/{total_iterations}") if print_intermediates else None
+                    
                     iteration += 1
                     x0 = [theta, delta_v, delta_v_angle, tof]
                     distance_rocket_lmo, total_delta_v = evaluate(cr3bp, x0, leo_alt_m, lmo_alt_m)
-                    print(f"Evaluating grid point: Theta={theta:.2f} rad, Delta_v={delta_v:.2f}, Delta_v_angle={delta_v_angle:.2f} rad, TOF={tof:.2f} s => Distance to LMO={distance_rocket_lmo*cr3bp.l_star*1e-3:.2f} km, Total Delta_v={total_delta_v*cr3bp.v_star*1e-3:.2f} km/s") if print_intermediates else None
-                    # Track minimum constraint value
+                    
+
                     if distance_rocket_lmo < min_constraint:
                         min_constraint = distance_rocket_lmo
                         min_constraint_x0 = [theta, delta_v, delta_v_angle, tof]
 
-                    # Check if constraint is satisfied and if objective is improved
-                    if distance_rocket_lmo <= tol and total_delta_v < min_delta_v:
-                        min_delta_v = total_delta_v
-                        optimal_delta_v = delta_v
-                        optimal_theta = theta
-                        optimal_delta_v_angle = delta_v_angle
-                        optimal_tof = tof
-                        print(f"New optimal found: Delta_v={optimal_delta_v*cr3bp.v_star*1e-3:.2f} km/s, Theta={optimal_theta:.2f} rad, Delta_v_angle={optimal_delta_v_angle:.2f} rad, TOF={optimal_tof:.2f} s, Distance to LMO={distance_rocket_lmo*cr3bp.l_star*1e-3:.2f} km")
-    
-    if optimal_delta_v is None:
-        print("No feasible solution found within the specified ranges and tolerance.")
-        print(f"Minimum constraint value: {min_constraint*cr3bp.l_star*1e-3:.2f} km (tolerance: {tol*cr3bp.l_star*1e-3:.2f} km)")
-        print(f"Best constraint point: Theta={min_constraint_x0[0]:.2f} rad, Delta_v={min_constraint_x0[1]:.2f}, Delta_v_angle={min_constraint_x0[2]:.2f} rad, TOF={min_constraint_x0[3]:.2f} s")
-        return np.array(min_constraint_x0), min_constraint
+                    if distance_rocket_lmo <= tol:
+                        print(f"Iteration: {iteration+1}/{total_iterations}") if print_intermediates else None
+                        feasible_solutions.append({
+                            'theta': theta,
+                            'delta_v': delta_v,
+                            'delta_v_angle': delta_v_angle,
+                            'tof': tof,
+                            'total_delta_v': total_delta_v,
+                            'distance_to_lmo': distance_rocket_lmo
+                        })
+                        print(f"Grid point satisfies constraint: Theta={theta:.2f} rad, Delta_v={delta_v:.2f}, Delta_v_angle={delta_v_angle:.2f} rad, TOF={tof:.2f} s => Distance to LMO={distance_rocket_lmo*cr3bp.l_star*1e-3:.2f} km, Total Delta_v={total_delta_v*cr3bp.v_star*1e-3:.2f} km/s") if print_intermediates else None
+
+                        if total_delta_v < min_delta_v:
+                            min_delta_v = total_delta_v
+                            print(f"New optimal found: Delta_v={delta_v*cr3bp.v_star*1e-3:.2f} km/s, Theta={theta:.2f} rad, Delta_v_angle={delta_v_angle:.2f} rad, TOF={tof:.2f} s, Distance to LMO={distance_rocket_lmo*cr3bp.l_star*1e-3:.2f} km")
+
+    results_df = pd.DataFrame(feasible_solutions)
+    if not results_df.empty:
+        results_df = results_df.sort_values('total_delta_v').reset_index(drop=True)
+        print(f"\nFound {len(results_df)} feasible solutions.")
     else:
-        return np.array([optimal_theta, optimal_delta_v, optimal_delta_v_angle, optimal_tof]),
+        print(f"\nNo feasible solutions found. Closest constraint value: {min_constraint*cr3bp.l_star*1e-3:.2f} km at {min_constraint_x0}")
+
+    return results_df
 
