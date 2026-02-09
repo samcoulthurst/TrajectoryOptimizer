@@ -183,7 +183,7 @@ def animate_trajectory(cr3bp, states, t_span, frame='rotating', fps=30,
         return earth_marker, moon_marker, sc_marker, trail_collection, time_text
 
     # Create animation
-    interval = 1000.0 / fps
+    interval = 500.0 / fps
     anim = FuncAnimation(
         fig,
         update,
