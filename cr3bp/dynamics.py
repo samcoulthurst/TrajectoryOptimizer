@@ -112,10 +112,6 @@ def circular_orbit_state_earth(cr3bp, theta, altitude_m):
         True anomaly / angle on orbit (radians), measured from +x axis
     altitude_m : float
         Altitude above Earth surface (m)
-    inclination : float, optional
-        Orbital inclination (radians), default 0 (equatorial)
-    mu : float
-        CR3BP mass parameter (default Earth-Moon value)
 
     Returns
     -------
@@ -156,6 +152,49 @@ def circular_orbit_state_earth(cr3bp, theta, altitude_m):
     vz = 0
 
     return np.array([x, y, z, vx, vy, vz])
+
+def ciruclar_orbit_trajectory_moon(cr3bp, state_f_inertial, state_moon_f_inertial, tof, num_points=1000):
+    """
+    Helper function which determines the trajectory of the llo which the rocket is at
+    Parameters
+    ----------  
+    cr3bp : Class
+    state_f_inertial : array 6,
+        state vector (x,y,z,vx,vy,vz) of rocket in the inertial ref frame in normalized units
+    state_moon_f_inertial : array 6,
+        state vector (x,y,z,vx,vy,vz) of moon in the inertial ref frame in normalized units
+    tof : float
+        Time of flight (normalized units)
+    num_points : int, optional
+        Number of points in the trajectory (default 1000)
+    Return
+    ------
+    llo_traj : array (6, num_points)
+        x,y,z,vx,vy,vz trajectory of the llo in the inertial frame in normalized units
+    """
+    pos_rocket = state_f_inertial[0:3]
+    pos_moon = state_moon_f_inertial[0:3]
+    r_rocket_moon = pos_rocket - pos_moon
+
+    r_orbit = np.linalg.norm(r_rocket_moon)
+    phi_0 = np.arctan2(r_rocket_moon[1], r_rocket_moon[0])
+    omega = -1 * np.sqrt(cr3bp.mu / r_orbit**3)
+
+    moon_r = np.linalg.norm(pos_moon)
+    moon_phi_0 = np.arctan2(pos_moon[1], pos_moon[0])
+
+    t_array = np.linspace(0, tof, num_points)
+
+    llo_traj = np.zeros((6, num_points))
+    for i, t in enumerate(t_array):
+        moon_phi = moon_phi_0 + t
+        phi = phi_0 + omega * t
+
+        llo_traj[0, i] = moon_r * np.cos(moon_phi) + r_orbit * np.cos(phi)
+        llo_traj[1, i] = moon_r * np.sin(moon_phi) + r_orbit * np.sin(phi)
+        llo_traj[2:, i] = 0
+
+    return llo_traj
 
 def decision_to_state0(cr3bp, x0, leo_alt_m):
     # Unpack decision variables
@@ -208,3 +247,5 @@ def v_llo_at_rocket_pos(cr3bp, state_f_inertial, moon_f_inertial):
     v_llo_dir = np.cross(np.array([0,0,1]),r_rocket_moon / np.linalg.norm(r_rocket_moon))
 
     return v_llo_mag * v_llo_dir
+
+

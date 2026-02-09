@@ -3,7 +3,7 @@ CR3BP - Circular Restricted Three-Body Problem Package
 
 """
 
-from .dynamics import cr3bp_eom, solve_CR3BP, decision_to_state0, circular_orbit_state_earth, v_llo_at_rocket_pos
+from .dynamics import cr3bp_eom, solve_CR3BP, decision_to_state0, circular_orbit_state_earth, ciruclar_orbit_trajectory_moon
 from .conversions import (
     rotating_to_inertial,
     inertial_to_rotating,
@@ -29,7 +29,7 @@ __all__ = [
     'solve_CR3BP',
     'decision_to_state0',
     'circular_orbit_state_earth',
-    'v_llo_at_rocket_pos',
+    'ciruclar_orbit_trajectory_moon',
     
     # Frame conversions
     'rotating_to_inertial',
