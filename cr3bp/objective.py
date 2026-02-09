@@ -5,7 +5,7 @@ This module contains the objective and constraint functions for CR3BP trajectori
 
 """
 import numpy as np
-from .dynamics import decision_to_state0
+from .dynamics import decision_to_state0, v_llo_at_rocket_pos
 
 def evaluate(cr3bp, x0, leo_alt_m, lmo_alt_m):
     """
@@ -142,30 +142,5 @@ def objective_func(cr3bp, x0, leo_alt_m):
 #Helper Funcs
 ######################################
 
-def v_llo_at_rocket_pos(cr3bp, state_f_inertial, moon_f_inertial):
-    """
-    Helper function which determines the velocity at the llo which the rocket is at
-    
-    Parameters
-    ----------
-    cr3bp : Class
 
-    state_f_inertial : array 6,
-        state vector (x,y,z,vx,vy,vz) of rocket in the inertial ref frame in normalized units
-    moon_f_inertial : array 6,
-        state vector (x,y,z,vx,vy,vz) of moon in the inertial ref frame in normalized units
-
-    Return
-    ------
-    v_llo: array 3,
-        velocity at the llo at pos_f_rocket_inertial
-    """
-    pos_rocket = state_f_inertial[0:3]
-    pos_moon = moon_f_inertial[0:3]
-    r_rocket_moon = pos_moon - pos_rocket
-
-    v_llo_mag = np.sqrt(cr3bp.mu / np.linalg.norm(r_rocket_moon))
-    v_llo_dir = np.cross(np.array([0,0,1]),r_rocket_moon / np.linalg.norm(r_rocket_moon))
-
-    return v_llo_mag * v_llo_dir
 

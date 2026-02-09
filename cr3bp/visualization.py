@@ -101,7 +101,7 @@ def animate_trajectory(cr3bp, states, t_span, frame='rotating', fps=30,
         fig, ax = plt.subplots(figsize=(10, 8))
 
     ax.set_xlim(x_min, x_max)
-    ax.set_ylim(y_min, y_max)
+    ax.set_ylim(-y_max, y_max)
     ax.set_aspect('equal')
     ax.set_xlabel('x (normalized)')
     ax.set_ylabel('y (normalized)')

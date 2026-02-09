@@ -180,3 +180,31 @@ def decision_to_state0(cr3bp, x0, leo_alt_m):
     state_leo_inertial_boost[4] += delta_v_y
 
     return cr3bp.inertial_to_rotating(state_leo_inertial_boost,0)
+
+
+def v_llo_at_rocket_pos(cr3bp, state_f_inertial, moon_f_inertial):
+    """
+    Helper function which determines the velocity at the llo which the rocket is at
+    
+    Parameters
+    ----------
+    cr3bp : Class
+
+    state_f_inertial : array 6,
+        state vector (x,y,z,vx,vy,vz) of rocket in the inertial ref frame in normalized units
+    moon_f_inertial : array 6,
+        state vector (x,y,z,vx,vy,vz) of moon in the inertial ref frame in normalized units
+
+    Return
+    ------
+    v_llo: array 3,
+        velocity at the llo at pos_f_rocket_inertial
+    """
+    pos_rocket = state_f_inertial[0:3]
+    pos_moon = moon_f_inertial[0:3]
+    r_rocket_moon = pos_moon - pos_rocket
+
+    v_llo_mag = np.sqrt(cr3bp.mu / np.linalg.norm(r_rocket_moon))
+    v_llo_dir = np.cross(np.array([0,0,1]),r_rocket_moon / np.linalg.norm(r_rocket_moon))
+
+    return v_llo_mag * v_llo_dir
