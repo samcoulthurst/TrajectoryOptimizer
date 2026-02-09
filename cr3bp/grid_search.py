@@ -6,6 +6,7 @@ This module contains the grid search functions to optimize the trajectories.
 """
 
 import numpy as np
+import pandas as pd
 from .objective import evaluate
 
 def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_intermediates=True):
@@ -50,10 +51,10 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
     iteration = 0
     total_iterations = num_theta * num_delta_v * num_delta_v_angle * num_tof
     # Iterate over the grid
-    for itheta, theta in enumerate(theta_range):
-        for idelta_v, delta_v in enumerate(delta_v_range):
-            for idelta_v_angle, delta_v_angle in enumerate(delta_v_angle_range):
-                for itof, tof in enumerate(tof_range):
+    for theta in theta_range:
+        for delta_v in delta_v_range:
+            for delta_v_angle in delta_v_angle_range:
+                for tof in tof_range:
                     print(f"Iteration: {iteration+1}/{total_iterations}") if print_intermediates else None
                     iteration += 1
                     x0 = [theta, delta_v, delta_v_angle, tof]

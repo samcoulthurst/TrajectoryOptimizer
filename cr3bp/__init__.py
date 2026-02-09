@@ -15,6 +15,7 @@ from .conversions import (
     trajectory_to_SI
 )
 from .plotting import plot_trajectory
+from .visualization import animate_trajectory
 from .system import CR3BPSystem, create_earth_moon_system
 from .objective import constraint, objective_func, evaluate
 from .grid_search import grid_search_method
@@ -48,6 +49,9 @@ __all__ = [
 
     # Plotting
     'plot_trajectory',
+
+    # Animation
+    'animate_trajectory',
 
     # Objective
     'constraint',
