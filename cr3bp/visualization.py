@@ -100,14 +100,14 @@ def animate_trajectory(cr3bp, states, t_span, frame='rotating', fps=30,
     with plt.style.context('dark_background'):
         fig, ax = plt.subplots(figsize=(10, 8))
 
-    ax.set_xlim(x_min, x_max)
-    ax.set_ylim(-y_max, y_max)
+    ax.set_xlim(1.3*x_min, 1.3*x_max)
+    ax.set_ylim(y_min, y_max)
     ax.set_aspect('equal')
     ax.set_xlabel('x (normalized)')
     ax.set_ylabel('y (normalized)')
 
     frame_label = 'Rotating' if frame == 'rotating' else 'Inertial'
-    ax.set_title(f'CR3BP Trajectory - {frame_label} Frame')
+    ax.set_title(f'LEO to LMO Trajectory - {frame_label} Frame')
     ax.grid(True, alpha=0.2)
 
     # Create artists
@@ -115,7 +115,8 @@ def animate_trajectory(cr3bp, states, t_span, frame='rotating', fps=30,
                             label='Earth', zorder=5)
     moon_marker, = ax.plot([], [], 'o', color='silver', markersize=7,
                            label='Moon', zorder=5)
-    sc_marker, = ax.plot([], [], 'o', color='lime', markersize=5, zorder=10)
+    sc_marker, = ax.plot([], [], 'o', color='lime', markersize=5,
+                           label='Rocket', zorder=10)
 
     trail_collection = LineCollection([], linewidths=1.5, zorder=4)
     ax.add_collection(trail_collection)
@@ -183,7 +184,7 @@ def animate_trajectory(cr3bp, states, t_span, frame='rotating', fps=30,
         return earth_marker, moon_marker, sc_marker, trail_collection, time_text
 
     # Create animation
-    interval = 500.0 / fps
+    interval = 250.0 / fps
     anim = FuncAnimation(
         fig,
         update,

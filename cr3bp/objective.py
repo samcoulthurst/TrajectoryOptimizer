@@ -138,9 +138,6 @@ def objective_func(cr3bp, x0, leo_alt_m):
     return delta_v1 + delta_v2
 
 
-######################################
-#Helper Funcs
-######################################
 
 
 
