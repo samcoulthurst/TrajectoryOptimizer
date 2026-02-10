@@ -33,10 +33,10 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
     """
 
     # Create grid of decision variables
-    num_theta = 20
-    num_delta_v = 20
-    num_delta_v_angle = 10
-    num_tof = 20
+    num_theta = 40
+    num_delta_v = 40
+    num_delta_v_angle = 20
+    num_tof = 40
     print(f"Performing grid search with {num_theta} x {num_delta_v} x {num_delta_v_angle} x {num_tof} = {num_theta*num_delta_v*num_delta_v_angle*num_tof} grid points...")
     theta_range = np.linspace(dec_var_ranges[0][0], dec_var_ranges[0][1], num_theta)
     delta_v_range = np.linspace(dec_var_ranges[1][0], dec_var_ranges[1][1], num_delta_v)
@@ -57,8 +57,11 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
                     
                     iteration += 1
                     x0 = [theta, delta_v, delta_v_angle, tof]
-                    distance_rocket_lmo, total_delta_v = evaluate(cr3bp, x0, leo_alt_m, lmo_alt_m)
-                    
+                    try:
+                        distance_rocket_lmo, total_delta_v = evaluate(cr3bp, x0, leo_alt_m, lmo_alt_m)
+                    except: # Catch any integration errors or other issues in evaluation
+                        print(f"Error evaluating grid point: Theta={theta:.2f} rad, Delta_v={delta_v:.2f}, Delta_v_angle={delta_v_angle:.2f} rad, TOF={tof:.2f} s. Skipping.")
+                        continue
 
                     if distance_rocket_lmo < min_constraint:
                         min_constraint = distance_rocket_lmo
@@ -74,6 +77,7 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
                             'total_delta_v': total_delta_v,
                             'distance_to_lmo': distance_rocket_lmo
                         })
+                        np.save("grid_search_results_backup.npy", feasible_solutions) # Backup results after each feasible solution found
                         print(f"Grid point satisfies constraint: Theta={theta:.2f} rad, Delta_v={delta_v:.2f}, Delta_v_angle={delta_v_angle:.2f} rad, TOF={tof:.2f} s => Distance to LMO={distance_rocket_lmo*cr3bp.l_star*1e-3:.2f} km, Total Delta_v={total_delta_v*cr3bp.v_star*1e-3:.2f} km/s") if print_intermediates else None
 
                         if total_delta_v < min_delta_v:
