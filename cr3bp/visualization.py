@@ -111,11 +111,11 @@ def animate_trajectory(cr3bp, states, t_span, frame='rotating', fps=30,
     ax.grid(True, alpha=0.2)
 
     # Create artists
-    earth_marker, = ax.plot([], [], 'o', color='deepskyblue', markersize=12,
+    earth_marker, = ax.plot([], [], 'o', color='deepskyblue', markersize=24,
                             label='Earth', zorder=5)
-    moon_marker, = ax.plot([], [], 'o', color='silver', markersize=7,
+    moon_marker, = ax.plot([], [], 'o', color='silver', markersize=14,
                            label='Moon', zorder=5)
-    sc_marker, = ax.plot([], [], 'o', color='lime', markersize=5,
+    sc_marker, = ax.plot([], [], 'o', color='lime', markersize=10,
                            label='Rocket', zorder=10)
 
     trail_collection = LineCollection([], linewidths=1.5, zorder=4)
