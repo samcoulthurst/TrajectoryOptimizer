@@ -34,8 +34,8 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
 
     # Create grid of decision variables
     num_theta = 40
-    num_delta_v = 40
-    num_delta_v_angle = 10
+    num_delta_v = 20
+    num_delta_v_angle = 20
     num_tof = 40
     print(f"Performing grid search with {num_theta} x {num_delta_v} x {num_delta_v_angle} x {num_tof} = {num_theta*num_delta_v*num_delta_v_angle*num_tof} grid points...")
     theta_range = np.linspace(dec_var_ranges[0][0], dec_var_ranges[0][1], num_theta)
