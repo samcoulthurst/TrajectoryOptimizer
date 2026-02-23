@@ -42,6 +42,11 @@ class CR3BPSystem:
             Mass of primary 2 (smaller body) in kg
         d : float
             Distance between primaries in meters
+        r1 : float
+            Radius of primary 1 in meters
+        r2 : float
+            Radius of primary 2 in meters 
+        
         """
         # Properties of the system
         self.m1 = m1  # kg

@@ -46,7 +46,7 @@ def evaluate(cr3bp, x0, leo_alt_m, lmo_alt_m):
     #print(f'Final Moon Pos {cr3bp.l_star * moon_pos}')
 
     distance_moon_rocket = np.linalg.norm(final_pos-moon_pos)
-    distance_rocket_lmo = distance_moon_rocket - (lmo_alt_m/cr3bp.l_star)
+    distance_rocket_lmo = distance_moon_rocket - (lmo_alt_m/cr3bp.l_star) - (cr3bp.r2/cr3bp.l_star)
 
 
     ### Objective ##################################
@@ -94,7 +94,7 @@ def constraint(cr3bp, x0, leo_alt_m, lmo_alt_m):
     print(f'Final Moon Pos {cr3bp.l_star * moon_pos}')
 
     distance_moon_rocket = np.linalg.norm(final_pos-moon_pos)
-    distance_rocket_lmo = distance_moon_rocket - (lmo_alt_m/cr3bp.l_star)
+    distance_rocket_lmo = distance_moon_rocket - (lmo_alt_m/cr3bp.l_star) - (cr3bp.r2/cr3bp.l_star)
     return distance_rocket_lmo
 
 

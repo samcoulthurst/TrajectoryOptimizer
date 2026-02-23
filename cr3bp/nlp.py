@@ -138,7 +138,7 @@ def solve_transfer_optimization():
     lmo_alt_m = 100e3   # 100 km LMO altitude
 
     ### Initial Guess from Grid Search #############################
-    x0 = np.load("grid_search_results.npy")
+    x0 = np.load("grid_search_results_constraint_optimal.npy")
     print(f"Initial guess from grid search: {x0}")
     print(f"  theta          = {x0[0]:.6f} rad")
     print(f"  delta_v        = {x0[1]:.6f} (normalized) = {x0[1]*em.v_star*1e-3:.4f} km/s")
