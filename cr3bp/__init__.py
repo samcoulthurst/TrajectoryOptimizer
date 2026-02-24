@@ -21,11 +21,11 @@ from .conversions import (
     trajectory_to_normalized,
     trajectory_to_SI
 )
-from .plotting import plot_trajectory
+from .plotting import plot_trajectory, contour_plot
 from .visualization import animate_trajectory
 from .system import CR3BPSystem, create_earth_moon_system
 from .objective import constraint, objective_func, evaluate
-from .grid_search import grid_search_method, shrink_ranges
+from .grid_search import grid_search_method, shrink_ranges, sweep_2d
 
 
 __version__ = '0.1.1'
@@ -58,6 +58,7 @@ __all__ = [
 
     # Plotting
     'plot_trajectory',
+    'contour_plot',
 
     # Animation
     'animate_trajectory',
@@ -69,5 +70,6 @@ __all__ = [
 
     # Grid Search
     'grid_search_method',
-    'shrink_ranges'
+    'shrink_ranges',
+    'sweep_2d'
 ]

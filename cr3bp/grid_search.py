@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 from .objective import evaluate
 
-def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_intermediates=True):
+def grid_search_method(cr3bp, grid_size, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_intermediates=True):
     """
     Function which performs the grid search algorithm to minimise the objective
     function whilst satisfying the constraint function.
@@ -33,10 +33,10 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
     """
 
     # Create grid of decision variables
-    num_theta = 20
-    num_delta_v = 20
-    num_delta_v_angle = 25
-    num_tof = 30
+    num_theta = grid_size[0]
+    num_delta_v = grid_size[1]
+    num_delta_v_angle = grid_size[2]
+    num_tof = grid_size[3]
     print(f"Performing grid search with {num_theta} x {num_delta_v} x {num_delta_v_angle} x {num_tof} = {num_theta*num_delta_v*num_delta_v_angle*num_tof} grid points...")
     theta_range = np.linspace(dec_var_ranges[0][0], dec_var_ranges[0][1], num_theta)
     delta_v_range = np.linspace(dec_var_ranges[1][0], dec_var_ranges[1][1], num_delta_v)
@@ -101,3 +101,18 @@ def shrink_ranges(optimals, dec_var_ranges, shrink_factor=0.5):
         upper_bound = min(optimal + (current_range * shrink_factor / 2), dec_var_ranges[i][1])
         new_ranges.append([lower_bound, upper_bound])
     return new_ranges
+
+def sweep_2d(cr3bp, var1, delta1, var2, delta2, grid_size, optimal_params, leo_alt_m, lmo_alt_m, tol=3e-6):
+    var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
+    idx1 = var_names.index(var1)
+    idx2 = var_names.index(var2)
+    
+    ranges = [[opt, opt] for opt in optimal_params]
+    ranges[idx1] = [optimal_params[idx1] - delta1, optimal_params[idx1] + delta1]
+    ranges[idx2] = [optimal_params[idx2] - delta2, optimal_params[idx2] + delta2]
+    
+    grid = [1, 1, 1, 1]
+    grid[idx1] = grid_size
+    grid[idx2] = grid_size
+    
+    return grid_search_method(cr3bp, tuple(grid), ranges, tol, leo_alt_m, lmo_alt_m)
