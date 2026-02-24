@@ -93,3 +93,11 @@ def grid_search_method(cr3bp, dec_var_ranges, tol, leo_alt_m, lmo_alt_m, print_i
 
     return results_df
 
+def shrink_ranges(optimals, dec_var_ranges, shrink_factor=0.5):
+    new_ranges = []
+    for i, optimal in enumerate(optimals):
+        current_range = dec_var_ranges[i][1] - dec_var_ranges[i][0]
+        lower_bound = max(optimal - (current_range * shrink_factor / 2), dec_var_ranges[i][0])
+        upper_bound = min(optimal + (current_range * shrink_factor / 2), dec_var_ranges[i][1])
+        new_ranges.append([lower_bound, upper_bound])
+    return new_ranges

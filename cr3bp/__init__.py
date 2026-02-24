@@ -18,7 +18,7 @@ from .plotting import plot_trajectory
 from .visualization import animate_trajectory
 from .system import CR3BPSystem, create_earth_moon_system
 from .objective import constraint, objective_func, evaluate
-from .grid_search import grid_search_method
+from .grid_search import grid_search_method, shrink_ranges
 
 
 __version__ = '0.1.0'
@@ -61,4 +61,5 @@ __all__ = [
 
     # Grid Search
     'grid_search_method',
+    'shrink_ranges'
 ]
