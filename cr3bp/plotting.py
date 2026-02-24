@@ -109,21 +109,24 @@ def plot_trajectory(states, mu, times=None, frame="Rotating"):
 
 from scipy.interpolate import griddata
 
-def contour_plot(x, y, z, levels=20, cmap='viridis', method='cubic',
-                 grid_res=200, filled=True, xlabel='x', ylabel='y',
-                 title=None, figsize=(8, 6)):
-    xi = np.linspace(x.min(), x.max(), grid_res)
-    yi = np.linspace(y.min(), y.max(), grid_res)
-    Xi, Yi = np.meshgrid(xi, yi)
-    Zi = griddata((x, y), z, (Xi, Yi), method=method)
-
-    fig, ax = plt.subplots(figsize=figsize)
-    plot_func = ax.contourf if filled else ax.contour
-    cs = plot_func(Xi, Yi, Zi, levels=levels, cmap=cmap)
-    fig.colorbar(cs, ax=ax)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
-    if title:
-        ax.set_title(title)
-
-    return fig, ax
+def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params):
+    var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
+    idx1 = var_names.index(var1_name)
+    idx2 = var_names.index(var2_name)
+    
+    V1 = results_df[var1_name].values.reshape(grid_size, grid_size)
+    V2 = results_df[var2_name].values.reshape(grid_size, grid_size)
+    objective = results_df['total_delta_v'].values.reshape(grid_size, grid_size)
+    
+    fig, ax = plt.subplots(figsize=(10, 7))
+    contour = ax.pcolormesh(V1, V2, objective, cmap='viridis', shading='auto')
+    fig.colorbar(contour, ax=ax, label='Total Delta-v')
+    
+    ax.plot(optimal_params[idx1], optimal_params[idx2], 'r*', markersize=15, label='Optimal')
+    
+    ax.set_xlabel(var1_name)
+    ax.set_ylabel(var2_name)
+    ax.set_title(f'Total Delta-v: {var1_name} vs {var2_name}')
+    ax.legend()
+    plt.tight_layout()
+    plt.show()
