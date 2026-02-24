@@ -248,4 +248,36 @@ def v_llo_at_rocket_pos(cr3bp, state_f_inertial, moon_f_inertial):
 
     return v_llo_mag * v_llo_dir
 
+def jacobi_integral(cr3bp, state):
+    """
+    Compute the Jacobi integral (Jacobi constant) for a given state in the rotating frame.
+    
+    Parameters
+    ----------
+    cr3bp : Class
+        CR3BP system containing mu and l_star for normalization
+    state : array_like, shape (6,)
+        State vector [x, y, z, vx, vy, vz] in normalized rotating frame
 
+    Returns
+    -------
+    C : float
+        Jacobi integral value for the given state
+    """
+    x, y, z, vx, vy, vz = state
+    mu = cr3bp.mu
+    
+    # Distances to primaries
+    r1 = np.sqrt((x + mu)**2 + y**2 + z**2)
+    r2 = np.sqrt((x - (1 - mu))**2 + y**2 + z**2)
+    
+    # Effective potential
+    U = 0.5 * (x**2 + y**2) + (1 - mu) / r1 + mu / r2
+    
+    # Kinetic energy
+    T = 0.5 * (vx**2 + vy**2 + vz**2)
+    
+    # Jacobi integral
+    C = 2*U - 2*T
+    
+    return C

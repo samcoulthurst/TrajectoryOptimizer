@@ -3,7 +3,14 @@ CR3BP - Circular Restricted Three-Body Problem Package
 
 """
 
-from .dynamics import cr3bp_eom, solve_CR3BP, decision_to_state0, circular_orbit_state_earth, ciruclar_orbit_trajectory_moon
+from .dynamics import (
+    cr3bp_eom, 
+    solve_CR3BP,
+    decision_to_state0,
+    circular_orbit_state_earth,
+    ciruclar_orbit_trajectory_moon,
+    jacobi_integral)
+
 from .conversions import (
     rotating_to_inertial,
     inertial_to_rotating,
@@ -21,7 +28,7 @@ from .objective import constraint, objective_func, evaluate
 from .grid_search import grid_search_method, shrink_ranges
 
 
-__version__ = '0.1.0'
+__version__ = '0.1.1'
 
 __all__ = [
     # Dynamics
@@ -30,6 +37,7 @@ __all__ = [
     'decision_to_state0',
     'circular_orbit_state_earth',
     'ciruclar_orbit_trajectory_moon',
+    'jacobi_integral',
     
     # Frame conversions
     'rotating_to_inertial',
