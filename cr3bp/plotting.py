@@ -119,7 +119,7 @@ def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params):
     objective = results_df['total_delta_v'].values.reshape(grid_size, grid_size)
     
     fig, ax = plt.subplots(figsize=(10, 7))
-    contour = ax.pcolormesh(V1, V2, objective, cmap='viridis', shading='auto')
+    contour = ax.pcolormesh(V1, V2, objective, cmap='viridis', shading='auto', vmin=3, vmax=3.6)
     fig.colorbar(contour, ax=ax, label='Total Delta-v')
     
     ax.plot(optimal_params[idx1], optimal_params[idx2], 'r*', markersize=15, label='Optimal')

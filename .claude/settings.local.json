@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git -C \"c:\\\\Users\\\\scoul\\\\Documents\\\\GitHub\\\\TrajectoryOptimizer\" branch -a)",
-      "Bash(git -C \"c:\\\\Users\\\\scoul\\\\Documents\\\\GitHub\\\\TrajectoryOptimizer\" log --oneline -20)"
+      "Bash(git -C \"c:\\\\Users\\\\scoul\\\\Documents\\\\GitHub\\\\TrajectoryOptimizer\" log --oneline -20)",
+      "Bash(python:*)"
     ]
   }
 }
