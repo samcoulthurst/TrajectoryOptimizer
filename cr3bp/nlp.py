@@ -3,7 +3,7 @@ import cyipopt
 
 from cr3bp.system import create_earth_moon_system
 from cr3bp.objective import evaluate
-
+from cr3bp import file_path
 
 class EarthMoonTransferNLP:
     """
@@ -138,7 +138,7 @@ def solve_transfer_optimization():
     lmo_alt_m = 100e3   # 100 km LMO altitude
 
     ### Initial Guess from Grid Search #############################
-    x0 = np.load("grid_search_results_constraint_optimal.npy")
+    x0 = np.load(f"{file_path}/optimals_iteration3.npy")
     print(f"Initial guess from grid search: {x0}")
     print(f"  theta          = {x0[0]:.6f} rad")
     print(f"  delta_v        = {x0[1]:.6f} (normalized) = {x0[1]*em.v_star*1e-3:.4f} km/s")

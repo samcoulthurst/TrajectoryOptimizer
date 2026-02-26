@@ -27,6 +27,7 @@ from .system import CR3BPSystem, create_earth_moon_system
 from .objective import constraint, objective_func, evaluate
 from .grid_search import grid_search_method, shrink_ranges, sweep_2d
 
+file_path = r"C:\Users\scoul\Documents\GitHub\TrajectoryOptimizer\results"
 
 __version__ = '0.1.1'
 
@@ -71,5 +72,8 @@ __all__ = [
     # Grid Search
     'grid_search_method',
     'shrink_ranges',
-    'sweep_2d'
+    'sweep_2d',
+
+    # File path
+    'file_path'
 ]
