@@ -106,9 +106,6 @@ def plot_trajectory(states, mu, times=None, frame="Rotating"):
         plt.axis('equal')
         plt.show()
 
-
-from scipy.interpolate import griddata
-
 def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params):
     var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
     idx1 = var_names.index(var1_name)
