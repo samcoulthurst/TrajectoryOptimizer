@@ -121,6 +121,18 @@ def shrink_ranges(optimals, dec_var_ranges, shrink_factor=0.5):
         new_ranges.append([lower_bound, upper_bound])
     return new_ranges
 
+def sweep_1d(cr3bp, var, delta, grid_size, optimal_params, leo_alt_m, lmo_alt_m, tol=3e-6):
+    var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
+    idx = var_names.index(var)
+    
+    ranges = [[opt, opt] for opt in optimal_params]
+    ranges[idx] = [optimal_params[idx] - delta, optimal_params[idx] + delta]
+    
+    grid = [1, 1, 1, 1]
+    grid[idx] = grid_size
+    
+    return grid_search_method(cr3bp, tuple(grid), ranges, tol, leo_alt_m, lmo_alt_m)
+
 def sweep_2d(cr3bp, var1, delta1, var2, delta2, grid_size, optimal_params, leo_alt_m, lmo_alt_m, tol=3e-6):
     var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
     idx1 = var_names.index(var1)
