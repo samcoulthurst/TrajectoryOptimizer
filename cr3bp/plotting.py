@@ -126,3 +126,22 @@ def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params):
     ax.legend()
     plt.tight_layout()
     plt.show()
+
+
+def plot_1d(results_df, var_name, optimal_params):
+    var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
+    idx = var_names.index(var_name)
+    
+    feasible = results_df.dropna(subset=['total_delta_v'])
+    feasible = feasible.sort_values(var_name)
+
+    plt.figure(figsize=(10, 6))
+    plt.plot(feasible[var_name], feasible['total_delta_v'], 'b-', linewidth=1.5, label='Total Delta-v')
+    plt.plot(optimal_params[idx], feasible['total_delta_v'].min(), 'r*', markersize=15, label='Optimal')
+    plt.xlabel(var_name)
+    plt.ylabel('Total Delta-v')
+    plt.title(f'Total Delta-v vs {var_name}')
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    plt.tight_layout()
+    plt.show()
