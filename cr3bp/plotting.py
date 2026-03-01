@@ -111,16 +111,15 @@ def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params):
     idx1 = var_names.index(var1_name)
     idx2 = var_names.index(var2_name)
     
-    V1 = results_df[var1_name].values.reshape(grid_size, grid_size)
-    V2 = results_df[var2_name].values.reshape(grid_size, grid_size)
-    objective = results_df['total_delta_v'].values.reshape(grid_size, grid_size)
+    feasible = results_df.dropna(subset=['total_delta_v'])
     
     fig, ax = plt.subplots(figsize=(10, 7))
-    contour = ax.pcolormesh(V1, V2, objective, cmap='viridis', shading='auto', vmin=3, vmax=5)
-    fig.colorbar(contour, ax=ax, label='Total Delta-v')
+    scatter = ax.scatter(feasible[var1_name], feasible[var2_name], 
+                        c=feasible['total_delta_v'], cmap='viridis', 
+                        vmin=3, vmax=5, s=10)
+    fig.colorbar(scatter, ax=ax, label='Total Delta-v')
     
     ax.plot(optimal_params[idx1], optimal_params[idx2], 'r*', markersize=15, label='Optimal')
-    
     ax.set_xlabel(var1_name)
     ax.set_ylabel(var2_name)
     ax.set_title(f'Total Delta-v: {var1_name} vs {var2_name}')
