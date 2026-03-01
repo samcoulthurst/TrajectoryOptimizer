@@ -34,8 +34,8 @@ def plot_trajectory(states, mu, times=None, frame="Rotating"):
         plt.plot(1-mu, 0, 'gray', marker='o', markersize=8, label='Moon')
 
         # Plot start/end
-        plt.plot(states[0, 0], states[1, 0], 'go', markersize=10, label='Start')
-        plt.plot(states[0, -1], states[1, -1], 'ro', markersize=10, label='End')
+        #plt.plot(states[0, 0], states[1, 0], 'go', markersize=10, label='Start')
+        #plt.plot(states[0, -1], states[1, -1], 'ro', markersize=10, label='End')
 
         plt.xlabel('x (normalized)')
         plt.ylabel('y (normalized)')
@@ -58,8 +58,8 @@ def plot_trajectory(states, mu, times=None, frame="Rotating"):
                 'b-', linewidth=1.5, label='Trajectory')
 
         # Plot start and end positions
-        plt.plot(states_inertial[0, 0], states_inertial[1, 0],
-                'go', markersize=10, label='Start')
+        #plt.plot(states_inertial[0, 0], states_inertial[1, 0],
+        #       'go', markersize=10, label='Start')
         #plt.plot(states_inertial[0, -1], states_inertial[1, -1],
         #        'ro', markersize=10, label='End')
 
@@ -128,7 +128,7 @@ def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params):
     plt.show()
 
 
-def plot_1d(results_df, var_name, optimal_params):
+def plot_1d(results_df, var_name, var_delta, optimal_params):
     var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
     idx = var_names.index(var_name)
     
@@ -138,6 +138,8 @@ def plot_1d(results_df, var_name, optimal_params):
     plt.figure(figsize=(10, 6))
     plt.plot(feasible[var_name], feasible['total_delta_v'], 'b-', linewidth=1.5, label='Total Delta-v')
     plt.plot(optimal_params[idx], feasible['total_delta_v'].min(), 'r*', markersize=15, label='Optimal')
+
+    plt.xlim(optimal_params[idx] - var_delta, optimal_params[idx] + var_delta)
     plt.xlabel(var_name)
     plt.ylabel('Total Delta-v')
     plt.title(f'Total Delta-v vs {var_name}')
