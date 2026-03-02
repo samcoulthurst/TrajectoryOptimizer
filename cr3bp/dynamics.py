@@ -241,12 +241,13 @@ def v_llo_at_rocket_pos(cr3bp, state_f_inertial, moon_f_inertial):
     """
     pos_rocket = state_f_inertial[0:3]
     pos_moon = moon_f_inertial[0:3]
+    vel_moon = moon_f_inertial[3:6]
     r_rocket_moon = pos_moon - pos_rocket
 
     v_llo_mag = np.sqrt(cr3bp.mu / np.linalg.norm(r_rocket_moon))
-    v_llo_dir = np.cross(np.array([0,0,1]),r_rocket_moon / np.linalg.norm(r_rocket_moon))
+    v_llo_dir = np.cross(np.array([0,0,1]), r_rocket_moon / np.linalg.norm(r_rocket_moon))
 
-    return v_llo_mag * v_llo_dir
+    return vel_moon + v_llo_mag * v_llo_dir
 
 def jacobi_integral(cr3bp, state):
     """
