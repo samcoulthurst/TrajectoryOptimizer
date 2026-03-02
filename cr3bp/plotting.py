@@ -106,17 +106,18 @@ def plot_trajectory(states, mu, times=None, frame="Rotating"):
         plt.axis('equal')
         plt.show()
 
-def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params, fontsize=12):
+def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params, fontsize=14):
     
     var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
     idx1 = var_names.index(var1_name)
     idx2 = var_names.index(var2_name)
     
     feasible = results_df.dropna(subset=['total_delta_v'])
+    feasible = feasible.sort_values(var1_name)
     
     fig, ax = plt.subplots(figsize=(10, 7))
     scatter = ax.scatter(feasible[var1_name], feasible[var2_name], 
-                        c=feasible['total_delta_v'], cmap='viridis', 
+                        c=feasible['total_delta_v'], cmap='turbo', 
                         vmin=3, vmax=3.7, s=10)
     cbar = fig.colorbar(scatter, ax=ax, label='Total Δv')
     cbar.ax.tick_params(labelsize=fontsize)
@@ -126,6 +127,7 @@ def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params, fo
     ax.set_xlabel(var1_name, fontsize=fontsize)
     ax.set_ylabel(var2_name, fontsize=fontsize)
     ax.tick_params(labelsize=fontsize)
+    ax.xaxis.set_major_locator(plt.MaxNLocator(6))  # max 6 ticks
     ax.legend(fontsize=fontsize)
     plt.tight_layout()
     plt.show()
