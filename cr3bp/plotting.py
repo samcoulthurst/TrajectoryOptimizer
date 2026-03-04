@@ -118,7 +118,7 @@ def contour_plot(results_df, var1_name, var2_name, grid_size, optimal_params, fo
     fig, ax = plt.subplots(figsize=(10, 7))
     scatter = ax.scatter(feasible[var1_name], feasible[var2_name], 
                         c=feasible['total_delta_v'], cmap='turbo', 
-                        vmin=3, vmax=3.7, s=10)
+                        vmin=3.7, vmax=4.5, s=10)
     cbar = fig.colorbar(scatter, ax=ax, label='Total Δv')
     cbar.ax.tick_params(labelsize=fontsize)
     cbar.set_label('Total Δv', fontsize=fontsize)
