@@ -147,3 +147,100 @@ def sweep_2d(cr3bp, var1, delta1, var2, delta2, grid_size, optimal_params, leo_a
     grid[idx2] = grid_size
     
     return grid_search_method(cr3bp, tuple(grid), ranges, tol, leo_alt_m, lmo_alt_m)
+
+def sweep_4d(cr3bp, optimal_x0, deltas, n_samples, tol, leo_alt_m, lmo_alt_m, seed=None):
+    """
+    Monte Carlo parameter sweep around an optimal solution to estimate
+    parameter ranges/tolerances.
+
+    Uniformly samples the 4D parameter space within ± delta of the optimal
+    solution, evaluates the constraint and objective functions at each point.
+
+    Parameters
+    ----------
+    cr3bp : Class
+        CR3BP system object
+    optimal_x0 : array-like, shape (4,)
+        Optimal solution [theta, delta_v, delta_v_angle, tof]
+    deltas : array-like, shape (4,)
+        Half-widths of sweep range for each variable
+        [d_theta, d_delta_v, d_delta_v_angle, d_tof]
+    n_samples : int
+        Number of Monte Carlo samples
+    tol : float
+        Tolerance for constraint satisfaction in normalized units
+    leo_alt_m : float
+        LEO altitude in metres
+    lmo_alt_m : float
+        LMO altitude in metres
+    seed : int, optional
+        Random seed for reproducibility
+
+    Returns
+    -------
+    results_df : pd.DataFrame
+        DataFrame with columns: theta, delta_v, delta_v_angle, tof,
+        total_delta_v, distance_to_lmo.
+        total_delta_v is NaN for infeasible points (|distance_to_lmo| > tol).
+        Sorted by total_delta_v (NaNs at end).
+    """
+    if seed is not None:
+        np.random.seed(seed)
+
+    optimal_x0 = np.array(optimal_x0)
+    deltas = np.array(deltas)
+
+    # Generate uniform samples: shape (n_samples, 4)
+    lower_bounds = optimal_x0 - deltas
+    upper_bounds = optimal_x0 + deltas
+    samples = np.random.uniform(lower_bounds, upper_bounds, size=(n_samples, 4))
+
+    # Pre-allocate results
+    total_delta_v = np.full(n_samples, np.nan)
+    distance_to_lmo = np.full(n_samples, np.nan)
+
+    print_interval = max(1, n_samples // 10)
+    n_feasible = 0
+
+    print(f"Parameter sweep: {n_samples} samples around optimal solution")
+    print(f"  theta:         {optimal_x0[0]:.4f} ± {deltas[0]:.4f}")
+    print(f"  delta_v:       {optimal_x0[1]:.6f} ± {deltas[1]:.6f}")
+    print(f"  delta_v_angle: {optimal_x0[2]:.4f} ± {deltas[2]:.4f}")
+    print(f"  tof:           {optimal_x0[3]:.4f} ± {deltas[3]:.4f}")
+    print()
+
+    for i in range(n_samples):
+        x0 = samples[i]
+
+        try:
+            dist, dv = evaluate(cr3bp, x0, leo_alt_m, lmo_alt_m)
+        except Exception:
+            # Integration failure — leave as NaN
+            continue
+
+        distance_to_lmo[i] = dist
+
+        if abs(dist) <= tol:
+            total_delta_v[i] = dv
+            n_feasible += 1
+
+        if (i + 1) % print_interval == 0:
+            pct = (i + 1) / n_samples * 100
+            print(f"  {pct:5.0f}% complete ({i+1}/{n_samples}) — {n_feasible} feasible so far")
+
+    # Build DataFrame
+    results_df = pd.DataFrame({
+        'theta': samples[:, 0],
+        'delta_v': samples[:, 1],
+        'delta_v_angle': samples[:, 2],
+        'tof': samples[:, 3],
+        'total_delta_v': total_delta_v,
+        'distance_to_lmo': distance_to_lmo
+    })
+
+    results_df = results_df.sort_values('total_delta_v', na_position='last').reset_index(drop=True)
+
+    n_failed = np.isnan(distance_to_lmo).sum()
+    print(f"\nSweep complete: {n_feasible} feasible, {n_samples - n_feasible - n_failed} infeasible, {n_failed} failed")
+
+    return results_df

@@ -21,11 +21,11 @@ from .conversions import (
     trajectory_to_normalized,
     trajectory_to_SI
 )
-from .plotting import plot_trajectory, contour_plot, plot_1d
+from .plotting import plot_trajectory, contour_plot, plot_1d, analyse_sweep
 from .visualization import animate_trajectory
 from .system import CR3BPSystem, create_earth_moon_system
 from .objective import constraint, objective_func, evaluate
-from .grid_search import grid_search_method, shrink_ranges, sweep_2d, sweep_1d
+from .grid_search import grid_search_method, shrink_ranges, sweep_1d, sweep_2d, sweep_4d
 
 file_path = r"C:\Users\scoul\Documents\GitHub\TrajectoryOptimizer\results"
 
@@ -60,7 +60,8 @@ __all__ = [
     # Plotting
     'plot_trajectory',
     'contour_plot',
-    'plot_1d'
+    'plot_1d',
+    'analyse_sweep',
 
     # Animation
     'animate_trajectory',
@@ -73,8 +74,9 @@ __all__ = [
     # Grid Search
     'grid_search_method',
     'shrink_ranges',
-    'sweep_2d',
     'sweep_1d',
+    'sweep_2d',
+    'sweep_4d',
 
     # File path
     'file_path'

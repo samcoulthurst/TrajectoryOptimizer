@@ -6,7 +6,7 @@ This module contains visualization functions for CR3BP trajectories.
 
 import numpy as np
 import matplotlib.pyplot as plt
-
+from itertools import combinations
 
 def plot_trajectory(states, mu, times=None, frame="Rotating"):
     """
@@ -152,3 +152,77 @@ def plot_1d(results_df, var_name, var_delta, optimal_params):
     plt.grid(True, alpha=0.3)
     plt.tight_layout()
     plt.show()
+
+
+def analyse_sweep(results_df, fontsize=14):
+    """
+    Find the optimal (lowest total_delta_v) from the sweep results and
+    plot all 6 pairwise 2D scatter slices through the 4D parameter space.
+
+    Parameters
+    ----------
+    results_df : pd.DataFrame
+        Output from parameter_sweep. Must contain columns:
+        theta, delta_v, delta_v_angle, tof, total_delta_v, distance_to_lmo.
+    fontsize : int, optional
+        Font size for labels and ticks.
+
+    Returns
+    -------
+    optimal_row : pd.Series
+        The row with the lowest total_delta_v.
+    fig : matplotlib.figure.Figure
+        The 2x3 subplot figure.
+    """
+    # Find new optimal
+    feasible = results_df.dropna(subset=['total_delta_v'])
+
+    if feasible.empty:
+        print("No feasible solutions found in sweep.")
+        return None, None
+
+    optimal_idx = feasible['total_delta_v'].idxmin()
+    optimal_row = feasible.loc[optimal_idx]
+
+    print("Optimal solution from sweep:")
+    print(f"  theta:         {optimal_row['theta']:.6f}")
+    print(f"  delta_v:       {optimal_row['delta_v']:.8f}")
+    print(f"  delta_v_angle: {optimal_row['delta_v_angle']:.6f}")
+    print(f"  tof:           {optimal_row['tof']:.6f}")
+    print(f"  total_delta_v: {optimal_row['total_delta_v']:.8f}")
+    print(f"  distance_to_lmo: {optimal_row['distance_to_lmo']:.2e}")
+
+    var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
+    pairs = list(combinations(var_names, 2))  # 6 pairs
+
+    fig, axes = plt.subplots(2, 3, figsize=(20, 12))
+    axes = axes.flatten()
+
+    for i, (var1, var2) in enumerate(pairs):
+        ax = axes[i]
+        idx1 = var_names.index(var1)
+        idx2 = var_names.index(var2)
+
+        scatter = ax.scatter(feasible[var1] - optimal_row[var1],
+                             feasible[var2] - optimal_row[var2],
+                             c=feasible['total_delta_v'], cmap='turbo',
+                             vmin=3.7, vmax=4.5, s=10)
+
+        ax.plot(0, 0, 'r*', markersize=15)
+
+        ax.set_xlabel(f'Δ{var1}', fontsize=fontsize)
+        ax.set_ylabel(f'Δ{var2}', fontsize=fontsize)
+        ax.tick_params(labelsize=fontsize)
+        ax.xaxis.set_major_locator(plt.MaxNLocator(4))
+
+    plt.suptitle('Parameter Sweep: 2D Projections', fontsize=fontsize + 2)
+    fig.subplots_adjust(right=0.88, wspace=0.35, hspace=0.35, top=0.92)
+
+    # Place colourbar in dedicated axis on the right
+    cbar_ax = fig.add_axes([0.91, 0.15, 0.02, 0.7])
+    cbar = fig.colorbar(scatter, cax=cbar_ax)
+    cbar.ax.tick_params(labelsize=fontsize)
+    cbar.set_label('Total Δv', fontsize=fontsize)
+    plt.show()
+
+    return optimal_row, fig 

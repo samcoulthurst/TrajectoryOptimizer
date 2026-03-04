@@ -277,7 +277,8 @@ def jacobi_integral(cr3bp, state):
     
     # Kinetic energy
     T = 0.5 * (vx**2 + vy**2 + vz**2)
-    
+    #print(U)
+    #print(T)
     # Jacobi integral
     C = 2*U - 2*T
     
