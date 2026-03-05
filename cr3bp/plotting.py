@@ -153,29 +153,34 @@ def plot_1d(results_df, var_name, var_delta, optimal_params):
     plt.tight_layout()
     plt.show()
 
-
-def analyse_sweep(results_df, fontsize=14):
+def analyse_sweep(results_df, cr3bp, fontsize=14):
     """
     Find the optimal (lowest total_delta_v) from the sweep results and
     plot all 6 pairwise 2D scatter slices through the 4D parameter space.
+
+    Values are converted to dimensional units and plotted relative to the
+    optimal solution.
 
     Parameters
     ----------
     results_df : pd.DataFrame
         Output from parameter_sweep. Must contain columns:
         theta, delta_v, delta_v_angle, tof, total_delta_v, distance_to_lmo.
+        All values in normalised CR3BP units.
+    cr3bp : object
+        CR3BP system object with attributes l_star, t_star, v_star.
     fontsize : int, optional
         Font size for labels and ticks.
 
     Returns
     -------
     optimal_row : pd.Series
-        The row with the lowest total_delta_v.
+        The row with the lowest total_delta_v (normalised units).
     fig : matplotlib.figure.Figure
         The 2x3 subplot figure.
     """
     # Find new optimal
-    feasible = results_df.dropna(subset=['total_delta_v'])
+    feasible = results_df.dropna(subset=['total_delta_v']).copy()
 
     if feasible.empty:
         print("No feasible solutions found in sweep.")
@@ -185,44 +190,66 @@ def analyse_sweep(results_df, fontsize=14):
     optimal_row = feasible.loc[optimal_idx]
 
     print("Optimal solution from sweep:")
-    print(f"  theta:         {optimal_row['theta']:.6f}")
-    print(f"  delta_v:       {optimal_row['delta_v']:.8f}")
-    print(f"  delta_v_angle: {optimal_row['delta_v_angle']:.6f}")
-    print(f"  tof:           {optimal_row['tof']:.6f}")
-    print(f"  total_delta_v: {optimal_row['total_delta_v']:.8f}")
-    print(f"  distance_to_lmo: {optimal_row['distance_to_lmo']:.2e}")
+    print(f"  theta:         {optimal_row['theta']:.6f} rad")
+    print(f"  delta_v:       {optimal_row['delta_v'] * cr3bp.v_star * 1e-3:.4f} km/s")
+    print(f"  delta_v_angle: {optimal_row['delta_v_angle']:.6f} rad")
+    print(f"  tof:           {optimal_row['tof'] * cr3bp.t_star / 86400:.4f} days")
+    print(f"  total_delta_v: {optimal_row['total_delta_v'] * cr3bp.v_star * 1e-3:.4f} km/s")
+    print(f"  distance_to_lmo: {optimal_row['distance_to_lmo'] * cr3bp.l_star * 1e-3:.4f} km")
 
+    # Dimensional conversion factors and labels
     var_names = ['theta', 'delta_v', 'delta_v_angle', 'tof']
+    var_config = {
+        'theta':         {'symbol': r'$\theta$',      'unit': 'rad',  'scale': 1.0},
+        'delta_v':       {'symbol': r'$\Delta v$',    'unit': 'km/s', 'scale': cr3bp.v_star * 1e-3},
+        'delta_v_angle': {'symbol': r'$\alpha$',      'unit': 'rad',  'scale': 1.0},
+        'tof':           {'symbol': r'$T$',           'unit': 'days', 'scale': cr3bp.t_star / 86400},
+    }
+
     pairs = list(combinations(var_names, 2))  # 6 pairs
+
+    # Convert total_delta_v to km/s for colour scale
+    dv_scale = cr3bp.v_star * 1e-3
+    feasible_dv_dim = feasible['total_delta_v'] * dv_scale
+    vmin = 3.7 * dv_scale
+    vmax = 4.5 * dv_scale
 
     fig, axes = plt.subplots(2, 3, figsize=(20, 12))
     axes = axes.flatten()
 
     for i, (var1, var2) in enumerate(pairs):
         ax = axes[i]
-        idx1 = var_names.index(var1)
-        idx2 = var_names.index(var2)
+        cfg1 = var_config[var1]
+        cfg2 = var_config[var2]
 
-        scatter = ax.scatter(feasible[var1] - optimal_row[var1],
-                             feasible[var2] - optimal_row[var2],
-                             c=feasible['total_delta_v'], cmap='turbo',
-                             vmin=3.7, vmax=4.5, s=10)
+        x = (feasible[var1] - optimal_row[var1]) * cfg1['scale']
+        y = (feasible[var2] - optimal_row[var2]) * cfg2['scale']
+
+        scatter = ax.scatter(x, y,
+                             c=feasible_dv_dim, cmap='viridis',
+                             vmin=vmin, vmax=vmax, s=15)
 
         ax.plot(0, 0, 'r*', markersize=15)
 
-        ax.set_xlabel(f'Δ{var1}', fontsize=fontsize)
-        ax.set_ylabel(f'Δ{var2}', fontsize=fontsize)
+        ax.set_xlabel(f"{cfg1['symbol']} ({cfg1['unit']})", fontsize=fontsize)
+        ax.set_ylabel(f"{cfg2['symbol']} ({cfg2['unit']})", fontsize=fontsize)
         ax.tick_params(labelsize=fontsize)
         ax.xaxis.set_major_locator(plt.MaxNLocator(4))
+        ax.ticklabel_format(style='scientific', scilimits=(0, 0), useMathText=True)
+        ax.xaxis.get_offset_text().set_fontsize(fontsize - 2)
+        ax.yaxis.get_offset_text().set_fontsize(fontsize - 2)
 
-    plt.suptitle('Parameter Sweep: 2D Projections', fontsize=fontsize + 2)
-    fig.subplots_adjust(right=0.88, wspace=0.35, hspace=0.35, top=0.92)
+        # Remove top and right spines
+        ax.spines['top'].set_visible(False)
+        ax.spines['right'].set_visible(False)
+
+    fig.subplots_adjust(right=0.88, wspace=0.35, hspace=0.35)
 
     # Place colourbar in dedicated axis on the right
     cbar_ax = fig.add_axes([0.91, 0.15, 0.02, 0.7])
     cbar = fig.colorbar(scatter, cax=cbar_ax)
     cbar.ax.tick_params(labelsize=fontsize)
-    cbar.set_label('Total Δv', fontsize=fontsize)
+    cbar.set_label(r'Total $\Delta v$ (km/s)', fontsize=fontsize)
     plt.show()
 
-    return optimal_row, fig 
+    return optimal_row, fig
