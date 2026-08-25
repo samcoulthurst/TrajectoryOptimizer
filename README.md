@@ -8,7 +8,12 @@ and error analysis, is in [`Report/`](Report/Minimum_Fuel_Transfer_Trajectory_Be
 
 **Stack:** Python 3.11 · NumPy · SciPy · pandas · matplotlib · Jupyter · uv
 
-![Optimal transfer trajectory from low Earth orbit to low lunar orbit](Report/figures/trajectory_rotating.png)
+![Animated Earth-to-Moon transfer trajectory](assets/trajectory_animation.gif)
+
+<sub>Simulated transfer in the *rotating frame*, where Earth (left) and Moon (right) are held
+fixed and the spacecraft coasts between them. Rendered by `cr3bp/visualization.py` from the
+integrated trajectory. The lunar orbit is drawn 15× larger than true scale — at 1,837 km radius
+against an Earth–Moon distance of 384,400 km it would otherwise be smaller than one pixel.</sub>
 
 ## Problem Definition
 
@@ -40,7 +45,7 @@ the Apollo missions) which costs **3.954 km/s**.
 
 ## Results
 
-> **Δv_total = 3.958 km/s** — 0.09% higher the 3.954 km/s Hohmann benchmark.
+> **Δv_total = 3.958 km/s** — 0.09% higher than the 3.954 km/s Hohmann benchmark.
 > The optimiser converged on a valid transfer, but not a cheaper one.
 
 Optimal parameters, with the range over which Δv_total stays within 5% of the optimum:
@@ -51,6 +56,10 @@ Optimal parameters, with the range over which Δv_total stays within 5% of the o
 | `Δv₁` | 3.1002 <sup>+0.0002</sup><sub>−0.0002</sub> km/s |
 | `α` | 0.1046 <sup>+0.0003</sup><sub>−0.0003</sub> rad |
 | `T` | 5.366 <sup>+0.003</sup><sub>−0.009</sub> days |
+
+![Optimal transfer trajectory in the rotating frame](Report/figures/trajectory_rotating.png)
+
+<sub>The optimal trajectory above, as published in the report.</sub>
 
 ## Discussion
 
