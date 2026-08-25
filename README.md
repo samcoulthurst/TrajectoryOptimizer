@@ -10,11 +10,11 @@ and error analysis, is in [`Report/`](Report/Minimum_Fuel_Transfer_Trajectory_Be
 
 ![Optimal transfer trajectory from low Earth orbit to low lunar orbit](Report/figures/trajectory_rotating.png)
 
-## The problem
+## Problem Definition
 
 Getting to the Moon cheaply is an optimisation problem. Fuel cost is measured in **Δv**
 (delta-v, the total change in velocity a spacecraft must produce), and because the rocket
-equation is exponential, roughly 90% of a rocket's launch mass is propellant — so small
+equation is exponential, roughly 90% of a rocket's launch mass is propellant, so small
 Δv savings translate into large mass and cost savings.
 
 The transfer uses two engine burns: one to leave a 167 km circular Earth orbit, and one to
@@ -28,10 +28,10 @@ this as cheap as possible:
 | `α` | which direction the first burn points |
 | `T` | how long the coast to the Moon lasts |
 
-The benchmark to beat is the **Hohmann transfer** — the classical two-body solution used by
-the Apollo missions — which costs **3.954 km/s**.
+The benchmark to beat is the **Hohmann transfer** (the classical two-body solution used by
+the Apollo missions) which costs **3.954 km/s**.
 
-## Approach
+## Method
 
 - **Posed as a constrained non-linear program:** minimise `Δv₁ + Δv₂` subject to a terminal position constraint (the spacecraft must actually arrive in a stable lunar orbit). The second burn `Δv₂` is *derived* from the arrival state rather than searched, which drops the search space from five dimensions to four.
 - **Hierarchical grid search** (4 levels, 20 points per variable, shrink factor 0.5). Each level re-centres and narrows the bounds around the most feasible point found by the level above. The constraint is optimised before the objective, so the search never chases a cheap trajectory that doesn't physically arrive.
@@ -40,7 +40,7 @@ the Apollo missions — which costs **3.954 km/s**.
 
 ## Results
 
-> **Δv_total = 3.958 km/s** — 0.09% *above* the 3.954 km/s Hohmann benchmark.
+> **Δv_total = 3.958 km/s** — 0.09% higher the 3.954 km/s Hohmann benchmark.
 > The optimiser converged on a valid transfer, but not a cheaper one.
 
 Optimal parameters, with the range over which Δv_total stays within 5% of the optimum:
@@ -52,23 +52,18 @@ Optimal parameters, with the range over which Δv_total stays within 5% of the o
 | `α` | 0.1046 <sup>+0.0003</sup><sub>−0.0003</sub> rad |
 | `T` | 5.366 <sup>+0.003</sup><sub>−0.009</sub> days |
 
-## Validation
+## Discussion
 
-- **Integrator correctness.** The Jacobi integral is a quantity the true dynamics conserve
-  exactly, so any drift in it is pure numerical error. Measured drift was σ = 4.9 × 10⁻¹²,
-  matching the solver's own 1e-12 tolerance — integration error is negligible relative to
-  the result.
+- **Integrator correctness.** The Jacobi integral is a quantity the true dynamics conserve exactly, so any drift in it is pure numerical error. Measured drift was σ = 4.9 × 10⁻¹², matching the solver's own 1e-12 tolerance — integration error is negligible relative to the result.
 - **Uncertainty quantification.** 400,000 Monte Carlo samples drawn uniformly from the final grid cell were used to map the feasible region and derive the sensitivity bounds above, at the 5% margin standard used by the European Space Agency.
 
-## Why it didn't beat the benchmark
-
-Worth stating plainly, since it's the most interesting part of the result:
+## Analysis
 
 1. **The flight-time bound was too short.** The search covered 2.5–7.5 days. Transfers that genuinely exploit three-body dynamics need `T ≈ 255` days — Topputo reaches 3.894 km/s out there. The cheap solutions were never inside the search box.
 2. **The algorithm's complexity was the binding constraint, not the physics.** The search is O(L·N⁴). Extending `T` by two orders of magnitude would mean roughly 2,000 hours of compute.
 3. **The refinement is greedy on a fractal landscape.** The phase space has structure at every scale, and discarding all but the best point at each level means a finite grid can converge to a local optimum — which is what happened here.
 
-The fix is to change solver class rather than throw compute at it: seed a gradient-based NLP solver (e.g. SNOPT, as used in NASA's GMAT) with this solution as an initial guess, and search a far wider range of `T` at much lower cost per evaluation.
+Seed a gradient-based NLP solver (e.g. SNOPT, as used in NASA's GMAT) with this solution as an initial guess, and search a far wider range of `T` at much lower cost per evaluation.
 
 ## Package layout
 
