@@ -10,10 +10,7 @@ and error analysis, is in [`Report/`](Report/Minimum_Fuel_Transfer_Trajectory_Be
 
 ![Animated Earth-to-Moon transfer trajectory](assets/trajectory_animation.gif)
 
-<sub>Simulated transfer in the *rotating frame*, where Earth (left) and Moon (right) are held
-fixed and the spacecraft coasts between them. Rendered by `cr3bp/visualization.py` from the
-integrated trajectory. The lunar orbit is drawn 15× larger than true scale — at 1,837 km radius
-against an Earth–Moon distance of 384,400 km it would otherwise be smaller than one pixel.</sub>
+<sub>Simulated transfer in the inertial Earth Frame. Sizes of orbits and planets are not to scale</sub>
 
 ## Problem Definition
 
