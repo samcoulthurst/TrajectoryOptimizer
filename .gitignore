@@ -1,4 +1,20 @@
+# Python
 __pycache__/
-physics/__pycache__/
 *.pyc
-*.pyc
+
+# Packaging / build
+*.egg-info/
+build/
+dist/
+
+# uv
+.venv/
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Local scratch
+scratchpad/
+
+# macOS
+.DS_Store

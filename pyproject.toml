@@ -1,0 +1,28 @@
+[project]
+name = "cr3bp"
+description = "Trajectory optimizer for the Circular Restricted Three-Body Problem"
+readme = "README.md"
+requires-python = ">=3.11"
+dynamic = ["version"]
+dependencies = [
+    "numpy",
+    "scipy",
+    "matplotlib",
+    "pandas",
+]
+
+[dependency-groups]
+dev = [
+    "jupyter",
+    "ipykernel",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.version]
+path = "cr3bp/__init__.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["cr3bp"]

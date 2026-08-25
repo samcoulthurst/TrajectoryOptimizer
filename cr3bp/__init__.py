@@ -46,7 +46,6 @@ __all__ = [
     # System
     'CR3BPSystem',
     'create_earth_moon_system',
-    'create_sun_earth_system',
 
     # Plotting
     'plot_trajectory',
